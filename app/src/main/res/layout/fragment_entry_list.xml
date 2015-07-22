@@ -16,6 +16,7 @@
         android:id="@+id/listView"
         android:layout_below="@+id/section_label"
         android:layout_centerHorizontal="true"
-        android:layout_gravity="top" />
+        android:layout_gravity="top"
+        />
 
 </RelativeLayout>
