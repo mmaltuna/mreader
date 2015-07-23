@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.JsonReader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,24 +15,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.mmaltuna.mreader.adapter.EntryListAdapter;
+import com.mmaltuna.mreader.model.Entry;
 import com.mmaltuna.mreader.utils.RestUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class EntryList extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -62,35 +58,77 @@ public class EntryList extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        String url = "https://sandbox.feedly.com/v3/subscriptions";
+        final String url = "https://sandbox.feedly.com/v3";
+        final Activity activity = this;
+
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "OAuth Apj6A-x7ImEiOiJGZWVkbHkgc2FuZGJveCBjbGllbnQiLCJlIjoxNDM4MTA4MTU1OTA5LCJpIjoiMDZhZTI2YjktMDExYS00OWMzLWFiY2YtN2M1ZDgzNWEyMDZkIiwicCI6NiwidCI6MSwidiI6InNhbmRib3giLCJ3IjoiMjAxNS4zMCIsIngiOiJzdGFuZGFyZCJ9:sandbox");
 
-        /*ListView mListView = (ListView) findViewById(R.id.listView);
-        ArrayList<String> titleList = new ArrayList<String>();
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, titleList);
-
-        titleList.add("tu ano");
-        arrayAdapter.notifyDataSetChanged();*/
-
-        RestUtils.getInstance(this).get(url, headers, null, new RestUtils.RequestCallback() {
+        RestUtils.getInstance(this).get(url + "/subscriptions", headers, null, new RestUtils.RequestCallback() {
             @Override
             public void invoke(String response) {
-                System.out.println("response[from callback!] = " + response);
-                ListView mListView = (ListView) findViewById(R.id.listView);
-                ArrayList<String> titleList = new ArrayList<String>();
-                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),
-                        android.R.layout.simple_list_item_1, titleList);
-                mListView.setAdapter(arrayAdapter);
-
                 try {
                     JSONArray jsonArray = new JSONArray(response);
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject o = jsonArray.getJSONObject(i);
-                        titleList.add((String) o.get("title"));
-                        arrayAdapter.notifyDataSetChanged();
-                        System.out.println((String) o.get("title"));
+
+                        String feedId = null;
+
+                        try {
+                            feedId = URLEncoder.encode((String) o.get("id"), "UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+
+                        }
+
+                        if (feedId != null) {
+                            Map<String, String> headers = new HashMap<String, String>();
+                            headers.put("Authorization", "OAuth Apj6A-x7ImEiOiJGZWVkbHkgc2FuZGJveCBjbGllbnQiLCJlIjoxNDM4MTA4MTU1OTA5LCJpIjoiMDZhZTI2YjktMDExYS00OWMzLWFiY2YtN2M1ZDgzNWEyMDZkIiwicCI6NiwidCI6MSwidiI6InNhbmRib3giLCJ3IjoiMjAxNS4zMCIsIngiOiJzdGFuZGFyZCJ9:sandbox");
+
+                            Map<String, String> params = new HashMap<String, String>();
+                            params.put("unreadOnly", "true");
+                            RestUtils.getInstance(getApplicationContext()).get(url + "/streams/" + feedId + "/contents", headers, params, new RestUtils.RequestCallback() {
+                                @Override
+                                public void invoke(String response) {
+
+                                    ListView mEntryList = (ListView) findViewById(R.id.entryList);
+                                    ArrayList<Entry> entries = new ArrayList<Entry>();
+                                    EntryListAdapter adapter = new EntryListAdapter(activity, entries);
+                                    mEntryList.setAdapter(adapter);
+
+                                    try {
+                                        JSONArray items = new JSONObject(response).getJSONArray("items");
+                                        for (int i = 0; i < items.length(); i++) {
+                                            JSONObject o = items.getJSONObject(i);
+                                            Entry e = new Entry();
+                                            e.setTitle((String) o.get("title"));
+                                            //e.setSummary((String) (o.getJSONObject("content").get("content")));
+                                            if (o.has("summary")) {
+                                                String summary = Jsoup.parse((String) (o.getJSONObject("summary").get("content"))).text();
+                                                int length = 0;
+                                                if (summary != null) {
+                                                    length = summary.length();
+                                                    summary = summary.substring(0, Math.min(length, 140));
+
+                                                    if (length > 140)
+                                                        summary += "...";
+                                                }
+
+                                                System.out.println("summary[from callback!] = " + summary);
+                                                e.setSummary(summary);
+                                            }
+
+                                            entries.add(e);
+                                        }
+
+                                        adapter.notifyDataSetChanged();
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
+
 
                     }
 
@@ -188,7 +226,7 @@ public class EntryList extends ActionBarActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_entry_list, container, false);
+            View rootView = inflater.inflate(R.layout.entry_list, container, false);
             return rootView;
         }
 
