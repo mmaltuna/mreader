@@ -1,15 +1,16 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".EntryList$PlaceholderFragment">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/entryList"
-        android:divider="#ff0000"
+        android:divider="@color/Grey200"
         android:dividerHeight="1dp"
-        android:listSelector="@drawable/entry_row_selector"
-        />
+        android:elevation="0dp"
+        android:background="@android:color/background_light"/>
 
 </RelativeLayout>

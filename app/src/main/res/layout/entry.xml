@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/entry_row_selector">
+    android:padding="8dp">
 
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/thumbnail"
@@ -18,7 +18,8 @@
         android:layout_alignTop="@+id/thumbnail"
         android:layout_toRightOf="@+id/thumbnail"
         android:textSize="17dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@android:color/primary_text_light"/>
 
     <TextView
         android:id="@+id/summary"
@@ -27,6 +28,6 @@
         android:layout_below="@+id/title"
         android:layout_marginTop="1dip"
         android:layout_toRightOf="@+id/thumbnail"
-        android:textSize="13dp" />
+        android:textSize="14dp" />
 
 </RelativeLayout>
