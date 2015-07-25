@@ -1,6 +1,6 @@
 package com.mmaltuna.mreader;
 
-import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -11,83 +11,86 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.mmaltuna.mreader.adapter.EntryListAdapter;
-import com.mmaltuna.mreader.model.Entry;
+import com.mmaltuna.mreader.adapter.SubscriptionListAdapter;
 import com.mmaltuna.mreader.model.Subscription;
 import com.mmaltuna.mreader.utils.FeedlyUtils;
 
 import java.util.ArrayList;
 
-public class EntryList extends AppCompatActivity {
-
-    private CharSequence mTitle;
+/**
+ * Created by miguel on 25/7/15.
+ */
+public class SubscriptionList extends AppCompatActivity {
 
     private Toolbar toolbar;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-    private ArrayList<Entry> shownEntries;
-    private EntryListAdapter adapter;
+    private ArrayList<Subscription> subscriptions;
+    private SubscriptionListAdapter adapter;
 
-    private static String selectedFeedId;
+    public final static String SELECTED_FEED_ID = "selectedFeedId";
+
+    private AdapterView.OnItemClickListener subscriptionListClickListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Intent intent = new Intent(getApplicationContext(), EntryList.class);
+            String selectedFeedId = ((Subscription) adapter.getItem(position)).getId();
+            intent.putExtra(SELECTED_FEED_ID, selectedFeedId);
+            startActivity(intent);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_entry_list);
-
-        Intent intent = getIntent();
-        selectedFeedId = intent.getStringExtra(SubscriptionList.SELECTED_FEED_ID);
+        setContentView(R.layout.activity_subscription_list);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        recyclerView = (RecyclerView) findViewById(R.id.entryListDrawerRecycler);
+        recyclerView = (RecyclerView) findViewById(R.id.subscriptionListDrawerRecycler);
         recyclerView.setHasFixedSize(true);
 
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-
-        drawerLayout = (DrawerLayout) findViewById(R.id.entryListActivityLayout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.subscriptionListActivityLayout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
         drawerLayout.setDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
-        ListView entryListView = (ListView) findViewById(R.id.entryList);
-        shownEntries = new ArrayList<Entry>();
-        adapter = new EntryListAdapter(this, shownEntries);
-        entryListView.setAdapter(adapter);
+        ListView subscriptionList = (ListView) findViewById(R.id.subscriptionList);
+        subscriptionList.setOnItemClickListener(subscriptionListClickListener);
+        subscriptions = new ArrayList<Subscription>();
+        adapter = new SubscriptionListAdapter(this, subscriptions);
+        subscriptionList.setAdapter(adapter);
 
-        Data data = Data.getInstance();
         FeedlyUtils feedly = FeedlyUtils.getInstance(this);
-        feedly.getEntries(selectedFeedId, new FeedlyUtils.Callback() {
+        feedly.getSubscriptions(new FeedlyUtils.Callback() {
             @Override
             public void onComplete() {
-                updateEntries();
+                updateSubscriptions();
             }
         });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.entry_list, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -95,11 +98,11 @@ public class EntryList extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void updateEntries() {
-        ArrayList<Entry> entries = Data.getInstance().entries.get(selectedFeedId);
-        if (entries != null) {
-            shownEntries.addAll(entries);
-            adapter.notifyDataSetChanged();
-        }
+    public void updateSubscriptions() {
+        for (Subscription s: Data.getInstance().subscriptions)
+            subscriptions.add(s);
+
+        adapter.notifyDataSetChanged();
     }
+
 }

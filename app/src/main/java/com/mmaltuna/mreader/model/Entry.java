@@ -8,6 +8,8 @@ import java.util.Date;
  * Created by miguel on 23/7/15.
  */
 public class Entry {
+    public final static int CHAR_LIMIT_SUMMARY = 140;
+
     private String title;
     private String summary;
     private Date date;
@@ -26,8 +28,8 @@ public class Entry {
         return summary;
     }
 
-    public String getSummary(int limit) {
-        String summary = Jsoup.parse(this.summary).text();
+    private String plainSummary(String summary, int limit) {
+        summary = Jsoup.parse(summary).text();
         int length = 0;
         if (summary != null) {
             length = summary.length();
@@ -41,7 +43,7 @@ public class Entry {
     }
 
     public void setSummary(String summary) {
-        this.summary = summary;
+        this.summary = plainSummary(summary, CHAR_LIMIT_SUMMARY);
     }
 
     public Date getDate() { return date; }

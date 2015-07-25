@@ -49,7 +49,7 @@ public class FeedlyUtils {
         return instance;
     }
 
-    public void getSubscriptions() {
+    public void getSubscriptions(@Nullable final Callback callback) {
         RestUtils.getInstance(context).get(BASE_URL + METHOD_SUBSCRIPTIONS, getHeaders(), null, new RestUtils.RequestCallback() {
             @Override
             public void invoke(String response) {
@@ -59,12 +59,15 @@ public class FeedlyUtils {
                     cacheSubscriptions(jsonResponse);
                 } catch (JSONException jsonException) {
                     jsonException.printStackTrace();
+                } finally {
+                    if (callback != null)
+                        callback.onComplete();
                 }
             }
         });
     }
 
-    public void getEntries(final String feedId) {
+    public void getEntries(final String feedId, @Nullable final Callback callback) {
         final String id = encodeString(feedId);
 
         String method = BASE_URL + METHOD_STREAMS + "/" + id + METHOD_CONTENTS;
@@ -81,6 +84,9 @@ public class FeedlyUtils {
                     cacheEntries(entries, id);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                } finally {
+                    if (callback != null)
+                        callback.onComplete();
                 }
             }
         });
@@ -130,7 +136,7 @@ public class FeedlyUtils {
 
                 Entry e = new Entry();
                 e.setTitle(o.getString("title"));
-                e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("contentt") : "");
+                e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("content") : "");
                 e.setDate(new Date(o.getLong("published")));
 
                 ArrayList<Entry> feedEntries = data.entries.get(feedId);
@@ -206,5 +212,9 @@ public class FeedlyUtils {
         } finally {
             return output;
         }
+    }
+
+    public static interface Callback {
+        public void onComplete();
     }
 }
