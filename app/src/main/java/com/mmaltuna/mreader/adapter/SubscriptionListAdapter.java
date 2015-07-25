@@ -10,36 +10,37 @@ import android.widget.TextView;
 
 import com.mmaltuna.mreader.R;
 import com.mmaltuna.mreader.model.Entry;
+import com.mmaltuna.mreader.model.Subscription;
 
 import java.util.ArrayList;
 
 /**
- * Created by miguel on 23/7/15.
+ * Created by miguel on 25/7/15.
  */
-public class EntryListAdapter extends BaseAdapter {
+public class SubscriptionListAdapter extends BaseAdapter {
 
-    private LayoutInflater layoutInflater;
     private Activity activity;
-    private ArrayList<Entry> entries;
+    private LayoutInflater layoutInflater;
+    private ArrayList<Subscription> subscriptions;
 
-    public EntryListAdapter(Activity activity, ArrayList<Entry> entries) {
+    public SubscriptionListAdapter(Activity activity, ArrayList<Subscription> subscriptions) {
         this.activity = activity;
-        this.entries = entries;
+        this.subscriptions = subscriptions;
     }
 
     @Override
     public int getCount() {
-        return entries.size();
+        return subscriptions.size();
     }
 
     @Override
-    public Object getItem(int index) {
-        return entries.get(index);
+    public Object getItem(int position) {
+        return subscriptions.get(position);
     }
 
     @Override
-    public long getItemId(int index) {
-        return index;
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -48,14 +49,12 @@ public class EntryListAdapter extends BaseAdapter {
             layoutInflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         if (convertView == null)
-            convertView = layoutInflater.inflate(R.layout.entry_row, null);
+            convertView = layoutInflater.inflate(R.layout.subscription_row, null);
 
-        TextView title = (TextView) convertView.findViewById(R.id.title);
-        TextView summary = (TextView) convertView.findViewById(R.id.summary);
+        TextView name = (TextView) convertView.findViewById(R.id.name);
 
-        Entry entry = entries.get(position);
-        title.setText(entry.getTitle());
-        summary.setText(entry.getSummary());
+        Subscription subscription = subscriptions.get(position);
+        name.setText(subscription.getTitle());
 
         return convertView;
     }
