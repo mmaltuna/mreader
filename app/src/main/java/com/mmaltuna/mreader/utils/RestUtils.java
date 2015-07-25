@@ -9,6 +9,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -43,7 +45,7 @@ public class RestUtils {
         get(url, headers, params, null);
     }
 
-    public void get(String url, final Map<String, String> headers, final Map<String, String> params, final RequestCallback callback) {
+    public JSONArray get(String url, final Map<String, String> headers, final Map<String, String> params, final RequestCallback callback) {
         StringRequest stringRequest = new StringRequest(url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -63,6 +65,7 @@ public class RestUtils {
         };
 
         requestQueue.add(stringRequest);
+        return null;
     }
 
     public static interface RequestCallback {
