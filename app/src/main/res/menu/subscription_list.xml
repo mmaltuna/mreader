@@ -1,8 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".EntryList">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".SubscriptionList">
 
     <item
         android:id="@+id/action_settings"
@@ -13,15 +14,9 @@
     <item
         android:id="@+id/action_refresh"
         android:icon="@drawable/ic_refresh_white_24dp"
-        android:title="Update"
+        android:title="Update all"
+        android:onClick="updateAll"
         android:orderInCategory="200"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/action_markallasread"
-        android:icon="@drawable/ic_done_all_white_24dp"
-        android:title="Mark all as read"
-        android:orderInCategory="300"
         app:showAsAction="ifRoom" />
 
 </menu>

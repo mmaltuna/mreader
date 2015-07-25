@@ -1,6 +1,5 @@
 package com.mmaltuna.mreader;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -14,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.mmaltuna.mreader.adapter.SubscriptionListAdapter;
 import com.mmaltuna.mreader.model.Subscription;
@@ -31,18 +31,20 @@ public class SubscriptionList extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-    private ArrayList<Subscription> subscriptions;
     private SubscriptionListAdapter adapter;
+    private ProgressBar progressBar;
+
+    private int syncProgress;
 
     public final static String SELECTED_FEED_ID = "selectedFeedId";
+    public final static String SELECTED_FEED_TITLE = "selectedFeedTitle";
 
     private AdapterView.OnItemClickListener subscriptionListClickListener = new AdapterView.OnItemClickListener() {
-
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent intent = new Intent(getApplicationContext(), EntryList.class);
-            String selectedFeedId = ((Subscription) adapter.getItem(position)).getId();
-            intent.putExtra(SELECTED_FEED_ID, selectedFeedId);
+            intent.putExtra(SELECTED_FEED_ID, ((Subscription) adapter.getItem(position)).getId());
+            intent.putExtra(SELECTED_FEED_TITLE, ((Subscription) adapter.getItem(position)).getTitle());
             startActivity(intent);
         }
     };
@@ -50,7 +52,7 @@ public class SubscriptionList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_subscription_list);
+        setContentView(R.layout.subscription_list_activity);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -68,23 +70,16 @@ public class SubscriptionList extends AppCompatActivity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
-        ListView subscriptionList = (ListView) findViewById(R.id.subscriptionList);
-        subscriptionList.setOnItemClickListener(subscriptionListClickListener);
-        subscriptions = new ArrayList<Subscription>();
-        adapter = new SubscriptionListAdapter(this, subscriptions);
-        subscriptionList.setAdapter(adapter);
+        syncProgress = 0;
+        progressBar = (ProgressBar) findViewById(R.id.progressbar);
+        progressBar.setProgress(syncProgress);
 
-        FeedlyUtils feedly = FeedlyUtils.getInstance(this);
-        feedly.getSubscriptions(new FeedlyUtils.Callback() {
-            @Override
-            public void onComplete() {
-                updateSubscriptions();
-            }
-        });
+        getAll();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.subscription_list, menu);
         return true;
     }
 
@@ -98,11 +93,73 @@ public class SubscriptionList extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void updateSubscriptions() {
-        for (Subscription s: Data.getInstance().subscriptions)
-            subscriptions.add(s);
+    public void getAll() {
+        final FeedlyUtils feedly = FeedlyUtils.getInstance(this);
+        ListView subscriptionList = (ListView) findViewById(R.id.subscriptionList);
+        subscriptionList.setOnItemClickListener(subscriptionListClickListener);
+        final ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
+        adapter = new SubscriptionListAdapter(this, subscriptions);
+        subscriptionList.setAdapter(adapter);
 
-        adapter.notifyDataSetChanged();
+        syncProgress = 0;
+        progressBar.setProgress(syncProgress);
+
+        feedly.getSubscriptions(new FeedlyUtils.Callback() {
+            @Override
+            public void onComplete() {
+                final int inc = 10000 / Data.getInstance().subscriptions.size();
+
+                for (final Subscription s : Data.getInstance().subscriptions) {
+                    feedly.getEntries(s.getId(), new FeedlyUtils.Callback() {
+                        @Override
+                        public void onComplete() {
+                            subscriptions.add(s);
+                            adapter.notifyDataSetChanged();
+
+                            syncProgress++;
+                            progressBar.setProgress(syncProgress * inc);
+                            if (syncProgress == Data.getInstance().subscriptions.size()) {
+                                progressBar.setProgress(0);
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 
+    public void updateAll(MenuItem menuItem) {
+        final FeedlyUtils feedly = FeedlyUtils.getInstance(this);
+        ListView subscriptionList = (ListView) findViewById(R.id.subscriptionList);
+        subscriptionList.setOnItemClickListener(subscriptionListClickListener);
+        adapter = new SubscriptionListAdapter(this, Data.getInstance().subscriptions);
+        subscriptionList.setAdapter(adapter);
+
+        syncProgress = 0;
+        progressBar.setProgress(syncProgress);
+
+        feedly.updateSubscriptions(new FeedlyUtils.Callback() {
+            @Override
+            public void onComplete() {
+                final int inc = 10000 / Data.getInstance().subscriptions.size();
+                for (int i = 0; i < Data.getInstance().subscriptions.size(); i++) {
+                    final int index = i;
+                    Subscription s = Data.getInstance().subscriptions.get(i);
+
+                    feedly.updateEntries(s.getId(), new FeedlyUtils.Callback() {
+                        @Override
+                        public void onComplete() {
+                            syncProgress++;
+                            progressBar.setProgress(syncProgress * inc);
+
+                            if (syncProgress == Data.getInstance().subscriptions.size()) {
+                                adapter.notifyDataSetChanged();
+                                progressBar.setProgress(0);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
 }

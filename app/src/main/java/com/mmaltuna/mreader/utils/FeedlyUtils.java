@@ -50,6 +50,13 @@ public class FeedlyUtils {
     }
 
     public void getSubscriptions(@Nullable final Callback callback) {
+        if (Data.getInstance().subscriptions.size() == 0)
+            updateSubscriptions(callback);
+        else
+            callback.onComplete();
+    }
+
+    public void updateSubscriptions(@Nullable final Callback callback) {
         RestUtils.getInstance(context).get(BASE_URL + METHOD_SUBSCRIPTIONS, getHeaders(), null, new RestUtils.RequestCallback() {
             @Override
             public void invoke(String response) {
@@ -68,6 +75,13 @@ public class FeedlyUtils {
     }
 
     public void getEntries(final String feedId, @Nullable final Callback callback) {
+        if (Data.getInstance().entries.get(feedId).size() == 0)
+            updateEntries(feedId, callback);
+        else
+            callback.onComplete();
+    }
+
+    public void updateEntries(final String feedId, @Nullable final Callback callback) {
         final String id = encodeString(feedId);
 
         String method = BASE_URL + METHOD_STREAMS + "/" + id + METHOD_CONTENTS;
@@ -109,6 +123,7 @@ public class FeedlyUtils {
 
     private void loadSubscriptions(JSONArray subscriptions) {
         Data data = Data.getInstance();
+        data.subscriptions.clear();
 
         try {
             for (int i = 0; i < subscriptions.length(); i++) {
@@ -128,24 +143,24 @@ public class FeedlyUtils {
     }
 
     private void loadEntries(JSONArray entries, String feedId) {
-        Data data = Data.getInstance();
+        ArrayList<Entry> feedEntries = Data.getInstance().entries.get(feedId);
+        feedEntries.clear();
 
-        try {
-            for (int i = 0; i < entries.length(); i++) {
-                JSONObject o = entries.getJSONObject(i);
+        if (feedEntries != null) {
+            try {
+                for (int i = 0; i < entries.length(); i++) {
+                    JSONObject o = entries.getJSONObject(i);
 
-                Entry e = new Entry();
-                e.setTitle(o.getString("title"));
-                e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("content") : "");
-                e.setDate(new Date(o.getLong("published")));
+                    Entry e = new Entry();
+                    e.setTitle(o.getString("title"));
+                    e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("content") : "");
+                    e.setDate(new Date(o.getLong("published")));
 
-                ArrayList<Entry> feedEntries = data.entries.get(feedId);
-                if (feedEntries != null) {
                     feedEntries.add(e);
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
