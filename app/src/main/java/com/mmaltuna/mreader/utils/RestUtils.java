@@ -3,17 +3,14 @@ package com.mmaltuna.mreader.utils;
 import android.content.Context;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
-
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 /**
  * Created by miguel on 22/7/15.
@@ -33,20 +30,21 @@ public class RestUtils {
         return instance;
     }
 
-    public void get(String url) {
-        get(url, null, null);
+    public void get(String url, final Map<String, String> headers, final Map<String, String> params, final RequestCallback callback) {
+        request(Request.Method.GET, url, headers, params, callback);
     }
 
-    public void get(String url, final RequestCallback callback) {
-        get(url, null, null, callback);
+    public void post(String url, final Map<String, String> headers, final Map<String, String> params, final RequestCallback callback) {
+        request(Request.Method.POST, url, headers, params, callback);
     }
 
-    public void get(String url, final Map<String, String> headers, final Map<String, String> params) {
-        get(url, headers, params, null);
-    }
+    private void request(int method, String url, final Map<String, String> headers,
+                     final Map<String, String> params, final RequestCallback callback) {
 
-    public JSONArray get(String url, final Map<String, String> headers, final Map<String, String> params, final RequestCallback callback) {
-        StringRequest stringRequest = new StringRequest(url, new Response.Listener<String>() {
+        if (method == Request.Method.GET && params != null && params.size() > 0)
+            url = addQueryString(url, params);
+
+        StringRequest stringRequest = new StringRequest(method, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 if (callback != null)
@@ -62,13 +60,26 @@ public class RestUtils {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;
             }
+
+            @Override
+            public Map<String, String> getParams() {
+                return params;
+            }
         };
 
         requestQueue.add(stringRequest);
-        return null;
     }
 
-    public static interface RequestCallback {
-        public void invoke(String response);
+    private String addQueryString(String url, Map<String, String> params) {
+        String queryString = "?";
+
+        for (String key: params.keySet())
+            queryString += key + "=" + params.get(key) + "&";
+
+        return url + queryString.substring(0, queryString.length() - 1);
+    }
+
+    public interface RequestCallback {
+        void invoke(String response);
     }
 }
