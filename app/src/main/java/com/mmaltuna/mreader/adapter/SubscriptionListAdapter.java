@@ -9,7 +9,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.mmaltuna.mreader.R;
-import com.mmaltuna.mreader.model.Entry;
 import com.mmaltuna.mreader.model.Subscription;
 
 import java.util.ArrayList;
@@ -22,10 +21,12 @@ public class SubscriptionListAdapter extends BaseAdapter {
     private Activity activity;
     private LayoutInflater layoutInflater;
     private ArrayList<Subscription> subscriptions;
+    private boolean unreadOnly;
 
-    public SubscriptionListAdapter(Activity activity, ArrayList<Subscription> subscriptions) {
+    public SubscriptionListAdapter(Activity activity, ArrayList<Subscription> subscriptions, boolean unreadOnly) {
         this.activity = activity;
         this.subscriptions = subscriptions;
+        this.unreadOnly = unreadOnly;
     }
 
     @Override
@@ -52,9 +53,18 @@ public class SubscriptionListAdapter extends BaseAdapter {
             convertView = layoutInflater.inflate(R.layout.subscription_row, null);
 
         TextView name = (TextView) convertView.findViewById(R.id.name);
+        TextView unreadCount = (TextView) convertView.findViewById(R.id.counter);
 
         Subscription subscription = subscriptions.get(position);
         name.setText(subscription.getTitle());
+
+        String counter = "";
+        if (unreadOnly)
+            counter = ((Integer) subscription.getUnreadEntries()).toString();
+        else
+            counter = ((Integer) subscription.getTotalEntries()).toString();
+
+        unreadCount.setText(counter);
 
         return convertView;
     }

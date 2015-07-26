@@ -3,7 +3,7 @@ package com.mmaltuna.mreader.utils;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.mmaltuna.mreader.Data;
+import com.mmaltuna.mreader.model.Data;
 import com.mmaltuna.mreader.model.Entry;
 import com.mmaltuna.mreader.model.Subscription;
 
@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -50,8 +51,12 @@ public class FeedlyUtils {
     }
 
     public void getSubscriptions(@Nullable final Callback callback) {
-        if (Data.getInstance().subscriptions.size() == 0)
-            updateSubscriptions(callback);
+        if (Data.getInstance().subscriptions.size() == 0) {
+            if (!getSubscriptionsFromFile())
+                updateSubscriptions(callback);
+            else
+                callback.onComplete();
+        }
         else
             callback.onComplete();
     }
@@ -75,19 +80,25 @@ public class FeedlyUtils {
     }
 
     public void getEntries(final String feedId, @Nullable final Callback callback) {
-        if (Data.getInstance().entries.get(feedId).size() == 0)
-            updateEntries(feedId, callback);
+        Data data = Data.getInstance();
+        if (data.unreadEntries.get(feedId).size() == 0 && data.readEntries.get(feedId).size() == 0) {
+            if (!getEntriesFromFile(feedId))
+                updateEntries(false, feedId, callback);
+            else
+                callback.onComplete();
+        }
         else
             callback.onComplete();
     }
 
-    public void updateEntries(final String feedId, @Nullable final Callback callback) {
+    public void updateEntries(boolean unreadOnly, final String feedId, @Nullable final Callback callback) {
         final String id = encodeString(feedId);
 
         String method = BASE_URL + METHOD_STREAMS + "/" + id + METHOD_CONTENTS;
 
         Map<String, String> params = new HashMap<String, String>();
-        params.put("unreadOnly", "true");
+        if (unreadOnly)
+            params.put("unreadOnly", "true");
 
         RestUtils.getInstance(context).get(method, getHeaders(), params, new RestUtils.RequestCallback() {
             @Override
@@ -106,19 +117,23 @@ public class FeedlyUtils {
         });
     }
 
-    public void getSubscriptionsFromFile() {
+    public boolean getSubscriptionsFromFile() {
         JSONArray subscriptions = fileToJSONArray(FILE_SUBSCRIPTIONS);
         if (subscriptions != null) {
             loadSubscriptions(subscriptions);
+            return true;
         }
+        return false;
     }
 
-    public void getEntriesFromFile(String feedId) {
+    public boolean getEntriesFromFile(String feedId) {
         String id = encodeString(feedId);
         JSONArray entries = fileToJSONArray(FILE_ENTRIES + "_" + id);
         if (entries != null) {
             loadEntries(entries, feedId);
+            return true;
         }
+        return false;
     }
 
     private void loadSubscriptions(JSONArray subscriptions) {
@@ -135,7 +150,8 @@ public class FeedlyUtils {
                 s.setTitle(o.getString("title"));
 
                 data.subscriptions.add(s);
-                data.entries.put(s.getId(), new ArrayList<Entry>());
+                data.unreadEntries.put(s.getId(), new ArrayList<Entry>());
+                data.readEntries.put(s.getId(), new ArrayList<Entry>());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -143,24 +159,29 @@ public class FeedlyUtils {
     }
 
     private void loadEntries(JSONArray entries, String feedId) {
-        ArrayList<Entry> feedEntries = Data.getInstance().entries.get(feedId);
-        feedEntries.clear();
+        Data data = Data.getInstance();
+        ArrayList<Entry> unreadEntries = data.unreadEntries.get(feedId);
+        ArrayList<Entry> readEntries = data.readEntries.get(feedId);
+        unreadEntries.clear();
+        readEntries.clear();
 
-        if (feedEntries != null) {
-            try {
-                for (int i = 0; i < entries.length(); i++) {
-                    JSONObject o = entries.getJSONObject(i);
+        try {
+            for (int i = 0; i < entries.length(); i++) {
+                JSONObject o = entries.getJSONObject(i);
 
-                    Entry e = new Entry();
-                    e.setTitle(o.getString("title"));
-                    e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("content") : "");
-                    e.setDate(new Date(o.getLong("published")));
+                Entry e = new Entry();
+                e.setTitle(o.getString("title"));
+                e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("content") : "");
+                e.setDate(new Date(o.getLong("published")));
+                e.setRead(!o.getBoolean("unread"));
 
-                    feedEntries.add(e);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+                if (e.isRead())
+                    readEntries.add(e);
+                else
+                    unreadEntries.add(e);
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -202,6 +223,8 @@ public class FeedlyUtils {
             file.close();
 
             return new JSONArray(stringBuilder.toString());
+        } catch (FileNotFoundException fileNotFoundException) {
+            System.out.println("File \"" + context.getFilesDir() + fname + "\" does not exist.");
         } catch (IOException ioException) {
             ioException.printStackTrace();
         } catch (JSONException jsonException) {

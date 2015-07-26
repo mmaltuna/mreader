@@ -16,10 +16,12 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.mmaltuna.mreader.adapter.SubscriptionListAdapter;
+import com.mmaltuna.mreader.model.Data;
 import com.mmaltuna.mreader.model.Subscription;
 import com.mmaltuna.mreader.utils.FeedlyUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by miguel on 25/7/15.
@@ -33,8 +35,11 @@ public class SubscriptionList extends AppCompatActivity {
     private ActionBarDrawerToggle drawerToggle;
     private SubscriptionListAdapter adapter;
     private ProgressBar progressBar;
+    private int progressBarMax = 10000;
+    private int progressBarInc;
+    private int progressBarStep;
 
-    private int syncProgress;
+    private boolean showUnreadOnly = true;
 
     public final static String SELECTED_FEED_ID = "selectedFeedId";
     public final static String SELECTED_FEED_TITLE = "selectedFeedTitle";
@@ -70,11 +75,9 @@ public class SubscriptionList extends AppCompatActivity {
         drawerLayout.setDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
-        syncProgress = 0;
-        progressBar = (ProgressBar) findViewById(R.id.progressbar);
-        progressBar.setProgress(syncProgress);
+        initProgressBar();
 
-        getAll();
+        loadData(false, showUnreadOnly);
     }
 
     @Override
@@ -93,73 +96,85 @@ public class SubscriptionList extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void getAll() {
-        final FeedlyUtils feedly = FeedlyUtils.getInstance(this);
+    public void loadData(final boolean update, final boolean unreadOnly) {
         ListView subscriptionList = (ListView) findViewById(R.id.subscriptionList);
-        subscriptionList.setOnItemClickListener(subscriptionListClickListener);
+
+        final Data data = Data.getInstance();
+        final FeedlyUtils feedly = FeedlyUtils.getInstance(this);
         final ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
-        adapter = new SubscriptionListAdapter(this, subscriptions);
+
+        adapter = new SubscriptionListAdapter(this, subscriptions, unreadOnly);
+        subscriptionList.setOnItemClickListener(subscriptionListClickListener);
         subscriptionList.setAdapter(adapter);
 
-        syncProgress = 0;
-        progressBar.setProgress(syncProgress);
+        initProgressBar();
 
-        feedly.getSubscriptions(new FeedlyUtils.Callback() {
+        FeedlyUtils.Callback subscriptionsCallback = new FeedlyUtils.Callback() {
             @Override
             public void onComplete() {
-                final int inc = 10000 / Data.getInstance().subscriptions.size();
+                progressBarInc = progressBarMax / data.subscriptions.size();
 
-                for (final Subscription s : Data.getInstance().subscriptions) {
-                    feedly.getEntries(s.getId(), new FeedlyUtils.Callback() {
-                        @Override
-                        public void onComplete() {
-                            subscriptions.add(s);
-                            adapter.notifyDataSetChanged();
+                for (final Subscription s: data.subscriptions) {
+                    if (update)
+                        feedly.updateEntries(unreadOnly, s.getId(), new FeedlyUtils.Callback() {
+                            @Override
+                            public void onComplete() {
+                                s.setUnreadEntries(data.unreadEntries.get(s.getId()).size());
+                                if (!unreadOnly || (unreadOnly && s.getUnreadEntries() > 0))
+                                    subscriptions.add(s);
 
-                            syncProgress++;
-                            progressBar.setProgress(syncProgress * inc);
-                            if (syncProgress == Data.getInstance().subscriptions.size()) {
-                                progressBar.setProgress(0);
+                                Collections.sort(subscriptions, Subscription.comparatorMostUnread);
+                                adapter.notifyDataSetChanged();
+
+                                loadSubscription();
                             }
-                        }
-                    });
+                        });
+                    else
+                        feedly.getEntries(s.getId(), new FeedlyUtils.Callback() {
+                            @Override
+                            public void onComplete() {
+                                s.setUnreadEntries(data.unreadEntries.get(s.getId()).size());
+                                if (!unreadOnly || (unreadOnly && s.getUnreadEntries() > 0))
+                                    subscriptions.add(s);
+
+                                Collections.sort(subscriptions, Subscription.comparatorMostUnread);
+                                adapter.notifyDataSetChanged();
+
+                                loadSubscription();
+                            }
+                        });
                 }
             }
-        });
+        };
+
+        if (update)
+            feedly.updateSubscriptions(subscriptionsCallback);
+        else
+            feedly.getSubscriptions(subscriptionsCallback);
     }
 
     public void updateAll(MenuItem menuItem) {
-        final FeedlyUtils feedly = FeedlyUtils.getInstance(this);
-        ListView subscriptionList = (ListView) findViewById(R.id.subscriptionList);
-        subscriptionList.setOnItemClickListener(subscriptionListClickListener);
-        adapter = new SubscriptionListAdapter(this, Data.getInstance().subscriptions);
-        subscriptionList.setAdapter(adapter);
+        loadData(true, showUnreadOnly);
+    }
 
-        syncProgress = 0;
-        progressBar.setProgress(syncProgress);
+    private void initProgressBar() {
+        progressBarStep = 0;
+        if (progressBar == null)
+            progressBar = (ProgressBar) findViewById(R.id.progressbar);
+        progressBar.setProgress(0);
+    }
 
-        feedly.updateSubscriptions(new FeedlyUtils.Callback() {
-            @Override
-            public void onComplete() {
-                final int inc = 10000 / Data.getInstance().subscriptions.size();
-                for (int i = 0; i < Data.getInstance().subscriptions.size(); i++) {
-                    final int index = i;
-                    Subscription s = Data.getInstance().subscriptions.get(i);
+    private void stepProgressBar() {
+        int progress = progressBar.getProgress();
+        progressBar.setProgress(progress + progressBarInc);
+        progressBarStep++;
+    }
 
-                    feedly.updateEntries(s.getId(), new FeedlyUtils.Callback() {
-                        @Override
-                        public void onComplete() {
-                            syncProgress++;
-                            progressBar.setProgress(syncProgress * inc);
-
-                            if (syncProgress == Data.getInstance().subscriptions.size()) {
-                                adapter.notifyDataSetChanged();
-                                progressBar.setProgress(0);
-                            }
-                        }
-                    });
-                }
-            }
-        });
+    private void loadSubscription() {
+        stepProgressBar();
+        if (progressBarStep == Data.getInstance().subscriptions.size()) {
+            adapter.notifyDataSetChanged();
+            initProgressBar();
+        }
     }
 }

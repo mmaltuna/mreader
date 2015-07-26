@@ -1,7 +1,4 @@
-package com.mmaltuna.mreader;
-
-import com.mmaltuna.mreader.model.Entry;
-import com.mmaltuna.mreader.model.Subscription;
+package com.mmaltuna.mreader.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +12,13 @@ public class Data {
     private static Data instance = null;
 
     public ArrayList<Subscription> subscriptions;
-    public Map<String, ArrayList<Entry>> entries;
+    public Map<String, ArrayList<Entry>> unreadEntries;
+    public Map<String, ArrayList<Entry>> readEntries;
 
     private Data() {
         subscriptions = new ArrayList<Subscription>();
-        entries = new HashMap<String, ArrayList<Entry>>();
+        unreadEntries = new HashMap<String, ArrayList<Entry>>();
+        readEntries = new HashMap<String, ArrayList<Entry>>();
     }
 
     public static Data getInstance() {
