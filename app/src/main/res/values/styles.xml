@@ -1,7 +1,14 @@
 <resources>
-    <style name="AppThemeRed" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Red" parent="Base.Theme.Red" />
+    <style name="Theme.Red.Navigation" parent="Base.Theme.Red" />
+
+    <style name="Base.Theme.Red" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/Red500</item>
         <item name="colorPrimaryDark">@color/Red700</item>
+    </style>
+
+    <style name="AppThemeRedToolbar" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:textColorSecondary">@color/White</item>
     </style>
 
     <style name="PopupTheme" parent="ThemeOverlay.AppCompat.Light">

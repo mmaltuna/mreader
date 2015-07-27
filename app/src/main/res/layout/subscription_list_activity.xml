@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/subscriptionListActivityLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,7 +31,7 @@
             layout="@layout/subscription_list"/>
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
+    <!--<android.support.v7.widget.RecyclerView
         android:id="@+id/subscriptionListDrawerRecycler"
         android:layout_width="320dp"
         android:layout_height="match_parent"
@@ -39,6 +40,13 @@
         android:background="@color/Grey100"
         android:elevation="16dp">
 
-    </android.support.v7.widget.RecyclerView>
+    </android.support.v7.widget.RecyclerView>-->
+
+    <android.support.design.widget.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/drawer_menu_header"/>
+    <!--app:menu="@menu/drawer"-->
 
 </android.support.v4.widget.DrawerLayout>

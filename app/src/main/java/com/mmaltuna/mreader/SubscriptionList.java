@@ -1,11 +1,11 @@
 package com.mmaltuna.mreader;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -62,18 +62,19 @@ public class SubscriptionList extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        recyclerView = (RecyclerView) findViewById(R.id.subscriptionListDrawerRecycler);
-        recyclerView.setHasFixedSize(true);
-
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
         drawerLayout = (DrawerLayout) findViewById(R.id.subscriptionListActivityLayout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
         drawerLayout.setDrawerListener(drawerToggle);
         drawerToggle.syncState();
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+            getWindow().setStatusBarColor(getResources().getColor(R.color.TransparentToolbar));
+        }
 
         initProgressBar();
 

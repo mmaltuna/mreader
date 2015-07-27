@@ -3,7 +3,10 @@
     <color name="Red500">#F44336</color>
     <color name="Red700">#D32F2F</color>
     <color name="Indigo500">#3F51B5</color>
+    <color name="White">#FFFFFF</color>
     <color name="Grey100">#F5F5F5</color>
     <color name="Grey200">#EEEEEE</color>
     <color name="Grey900">#212121</color>
+
+    <color name="TransparentToolbar">#05000000</color>
 </resources>

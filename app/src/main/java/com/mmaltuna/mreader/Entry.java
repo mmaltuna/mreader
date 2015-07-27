@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.webkit.WebView;
+import android.widget.RelativeLayout;
 
 import com.mmaltuna.mreader.model.Data;
 

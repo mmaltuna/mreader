@@ -6,6 +6,6 @@
     android:layout_height="wrap_content"
     android:background="@color/Red500"
     android:elevation="4dp"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark"
+    android:theme="@style/AppThemeRedToolbar"
     app:popupTheme="@style/PopupTheme">
 </android.support.v7.widget.Toolbar>
