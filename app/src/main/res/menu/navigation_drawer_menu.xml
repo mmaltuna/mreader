@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/navigationGroup"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/navDrawerUnread"
+            android:checked="true"
+            android:icon="@drawable/ic_unread_black_24dp"
+            android:title="Unread entries" />
+
+        <item
+            android:id="@+id/navDrawerRead"
+            android:icon="@drawable/ic_read_black_24dp"
+            android:title="Read entries" />
+
+        <item
+            android:id="@+id/navDrawerSaved"
+            android:icon="@drawable/ic_bookmark_black_24dp"
+            android:title="Saved entries" />
+    </group>
+
+    <group>
+        <item
+            android:id="@+id/navDrawerSettings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="Settings" />
+    </group>
+
+</menu>

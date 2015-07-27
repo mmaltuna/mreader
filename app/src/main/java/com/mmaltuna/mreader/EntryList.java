@@ -14,6 +14,7 @@ import com.mmaltuna.mreader.adapter.EntryListAdapter;
 import com.mmaltuna.mreader.model.Data;
 import com.mmaltuna.mreader.utils.FeedlyUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 public class EntryList extends AppCompatActivity {
@@ -25,6 +26,7 @@ public class EntryList extends AppCompatActivity {
 
     private static String selectedFeedId;
     private static String selectedFeedTitle;
+    private static int selectedView;
 
     private AdapterView.OnItemClickListener entryClickListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -45,6 +47,7 @@ public class EntryList extends AppCompatActivity {
         Intent intent = getIntent();
         selectedFeedId = intent.getStringExtra(SubscriptionList.SELECTED_FEED_ID);
         selectedFeedTitle = intent.getStringExtra(SubscriptionList.SELECTED_FEED_TITLE);
+        selectedView = intent.getIntExtra(SubscriptionList.SELECTED_VIEW, SubscriptionList.VIEW_UNREAD);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -53,12 +56,26 @@ public class EntryList extends AppCompatActivity {
         getSupportActionBar().setTitle(selectedFeedTitle);
 
         ListView entryListView = (ListView) findViewById(R.id.entryList);
-        adapter = new EntryListAdapter(this, Data.getInstance().unreadEntries.get(selectedFeedId));
+
+        ArrayList<com.mmaltuna.mreader.model.Entry> entryList = new ArrayList<com.mmaltuna.mreader.model.Entry>();
+        switch (selectedView) {
+            case SubscriptionList.VIEW_UNREAD:
+                entryList = Data.getInstance().unreadEntries.get(selectedFeedId);
+                break;
+            case SubscriptionList.VIEW_READ:
+                entryList = Data.getInstance().readEntries.get(selectedFeedId);
+                break;
+            case SubscriptionList.VIEW_SAVED:
+                break;
+        }
+
+        adapter = new EntryListAdapter(this, entryList);
         entryListView.setAdapter(adapter);
         entryListView.setOnItemClickListener(entryClickListener);
+        adapter.notifyDataSetChanged();
 
 
-        FeedlyUtils feedly = FeedlyUtils.getInstance(this);
+        /*FeedlyUtils feedly = FeedlyUtils.getInstance(this);
         feedly.getEntries(selectedFeedId, new FeedlyUtils.Callback() {
             @Override
             public void onComplete() {
@@ -66,12 +83,12 @@ public class EntryList extends AppCompatActivity {
                     com.mmaltuna.mreader.model.Entry.comparatorNewest);
                 adapter.notifyDataSetChanged();
             }
-        });
+        });*/
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.entry_list, menu);
+        getMenuInflater().inflate(R.menu.entry_list_menu, menu);
         return true;
     }
 

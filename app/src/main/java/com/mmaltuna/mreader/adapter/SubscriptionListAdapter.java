@@ -62,7 +62,7 @@ public class SubscriptionListAdapter extends BaseAdapter {
         if (unreadOnly)
             counter = ((Integer) subscription.getUnreadEntries()).toString();
         else
-            counter = ((Integer) subscription.getTotalEntries()).toString();
+            counter = ((Integer) subscription.getReadEntries()).toString();
 
         unreadCount.setText(counter);
 

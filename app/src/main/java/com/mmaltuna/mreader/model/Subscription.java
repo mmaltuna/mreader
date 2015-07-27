@@ -19,10 +19,10 @@ public class Subscription {
         }
     };
 
-    public static Comparator<Subscription> comparatorLeastUnread = new Comparator<Subscription>() {
+    public static Comparator<Subscription> comparatorAToZ = new Comparator<Subscription>() {
         @Override
         public int compare(Subscription s1, Subscription s2) {
-            return s1.getUnreadEntries() - s2.getUnreadEntries();
+            return s1.getTitle().compareTo(s2.getTitle());
         }
     };
 
