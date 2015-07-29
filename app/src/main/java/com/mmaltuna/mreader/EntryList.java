@@ -12,10 +12,8 @@ import android.widget.ListView;
 
 import com.mmaltuna.mreader.adapter.EntryListAdapter;
 import com.mmaltuna.mreader.model.Data;
-import com.mmaltuna.mreader.utils.FeedlyUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class EntryList extends AppCompatActivity {
 
@@ -35,6 +33,7 @@ public class EntryList extends AppCompatActivity {
             intent.putExtra(EntryList.SELECTED_ENTRY_ID, adapter.getItemId(position));
             intent.putExtra(SubscriptionList.SELECTED_FEED_ID, selectedFeedId);
             intent.putExtra(SubscriptionList.SELECTED_FEED_TITLE, selectedFeedTitle);
+            intent.putExtra(SubscriptionList.SELECTED_VIEW, selectedView);
             startActivity(intent);
         }
     };
@@ -73,17 +72,6 @@ public class EntryList extends AppCompatActivity {
         entryListView.setAdapter(adapter);
         entryListView.setOnItemClickListener(entryClickListener);
         adapter.notifyDataSetChanged();
-
-
-        /*FeedlyUtils feedly = FeedlyUtils.getInstance(this);
-        feedly.getEntries(selectedFeedId, new FeedlyUtils.Callback() {
-            @Override
-            public void onComplete() {
-                Collections.sort(Data.getInstance().unreadEntries.get(selectedFeedId),
-                    com.mmaltuna.mreader.model.Entry.comparatorNewest);
-                adapter.notifyDataSetChanged();
-            }
-        });*/
     }
 
     @Override

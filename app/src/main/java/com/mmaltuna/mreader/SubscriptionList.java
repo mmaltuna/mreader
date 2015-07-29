@@ -57,6 +57,7 @@ public class SubscriptionList extends AppCompatActivity {
     private int progressBarStep;
 
     private int currentView;
+    private Toast currentToast;
 
     private AdapterView.OnItemClickListener subscriptionListClickListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -169,7 +170,7 @@ public class SubscriptionList extends AppCompatActivity {
             @Override
             public void onComplete() {
                 if (update)
-                    Toast.makeText(getApplicationContext(), "Updating entries...", Toast.LENGTH_LONG).show();
+                    currentToast.setText("Updating entries...");
                 progressBarInc = progressBarMax / data.subscriptions.size();
 
                 for (final Subscription s: data.subscriptions) {
@@ -214,7 +215,8 @@ public class SubscriptionList extends AppCompatActivity {
         };
 
         if (update) {
-            Toast.makeText(this, "Updating subscriptions...", Toast.LENGTH_SHORT).show();
+            currentToast = Toast.makeText(this, "Updating subscriptions...", Toast.LENGTH_SHORT);
+            currentToast.show();
             feedly.updateSubscriptions(subscriptionsCallback);
         }
         else

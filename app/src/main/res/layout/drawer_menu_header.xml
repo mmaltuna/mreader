@@ -32,7 +32,7 @@
             android:textColor="@color/Grey100"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="5dp"
-            android:text="mshobj@gmail.com"
+            android:text="mmaltuna@gmail.com"
             android:textSize="14sp"
             android:textStyle="normal"/>
 

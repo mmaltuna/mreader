@@ -1,0 +1,17 @@
+img, iframe {
+    max-width: 100%;
+    min-width: 100%;
+    height: auto;
+}
+
+body {
+    padding-left: 5%;
+    padding-right: 5%;
+    font-size: 17px;
+}
+
+a {
+    color: #3F51B5;
+    text-decoration: none;
+    font-weight: bold;
+}

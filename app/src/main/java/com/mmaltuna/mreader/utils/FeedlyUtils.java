@@ -174,6 +174,10 @@ public class FeedlyUtils {
                 e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("content") : "");
                 e.setDate(new Date(o.getLong("published")));
                 e.setRead(!o.getBoolean("unread"));
+                e.setAuthor(o.has("author") ? o.getString("author") : "");
+                e.setUrl(o.getString("originId"));
+                e.setContent(o.has("content") ? o.getJSONObject("content").getString("content") : "");
+                e.setId(o.getString("id"));
 
                 if (e.isRead())
                     readEntries.add(e);
@@ -236,7 +240,7 @@ public class FeedlyUtils {
 
     private Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Authorization", "OAuth Apj6A-x7ImEiOiJGZWVkbHkgc2FuZGJveCBjbGllbnQiLCJlIjoxNDM4MTA4MTU1OTA5LCJpIjoiMDZhZTI2YjktMDExYS00OWMzLWFiY2YtN2M1ZDgzNWEyMDZkIiwicCI6NiwidCI6MSwidiI6InNhbmRib3giLCJ3IjoiMjAxNS4zMCIsIngiOiJzdGFuZGFyZCJ9:sandbox");
+        headers.put("Authorization", "OAuth As8ai9d7ImEiOiJGZWVkbHkgc2FuZGJveCBjbGllbnQiLCJlIjoxNDM4Nzk4Njg4MDg0LCJpIjoiMDZhZTI2YjktMDExYS00OWMzLWFiY2YtN2M1ZDgzNWEyMDZkIiwicCI6NiwidCI6MSwidiI6InNhbmRib3giLCJ3IjoiMjAxNS4zMCIsIngiOiJzdGFuZGFyZCJ9:sandbox");
         return headers;
     }
 

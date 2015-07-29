@@ -1,6 +1,9 @@
 package com.mmaltuna.mreader.model;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -19,6 +22,8 @@ public class Entry {
     private String url;
     private Date date;
     private boolean read;
+
+    public Elements elements;
 
     public Entry() {}
 
@@ -73,6 +78,7 @@ public class Entry {
     }
 
     public void setContent(String content) {
+        parseContent(content);
         this.content = content;
     }
 
@@ -112,5 +118,10 @@ public class Entry {
         }
 
         return summary;
+    }
+
+    private void parseContent(String content) {
+        Document doc = Jsoup.parse(content);
+        elements = doc.body().children();
     }
 }
