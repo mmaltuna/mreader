@@ -6,10 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mmaltuna.mreader.R;
 import com.mmaltuna.mreader.model.Entry;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -52,10 +54,15 @@ public class EntryListAdapter extends BaseAdapter {
 
         TextView title = (TextView) convertView.findViewById(R.id.title);
         TextView summary = (TextView) convertView.findViewById(R.id.summary);
+        ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
 
         Entry entry = entries.get(position);
         title.setText(entry.getTitle());
-        summary.setText(entry.getSummary());
+        summary.setText(entry.getSummaryFragment());
+        if ("".compareTo(entry.getThumbnailUrl()) != 0) {
+            System.out.println(entry.getThumbnailUrl());
+            Picasso.with(activity).load(entry.getThumbnailUrl()).into(thumbnail);
+        }
 
         return convertView;
     }

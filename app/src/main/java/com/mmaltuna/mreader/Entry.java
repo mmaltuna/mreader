@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -101,13 +102,15 @@ public class Entry extends AppCompatActivity {
     private String getHeader(com.mmaltuna.mreader.model.Entry entry) {
         String header = "";
 
-        header += "<h1 class='header-title'>" + entry.getTitle() + "</h1>";
+        header += "<div class='header'>";
+        header += "<h1 class='header-title'><a href='" + entry.getUrl() + "'>" + entry.getTitle() + "</a></h1>";
 
         String author = entry.getAuthor();
-        if (author.length() > 0)
+        if (author != null)
             header += "<span class='header-author'>" + entry.getAuthor() + "</span>";
 
         header += "<span class='header-date'>" + formatDate(entry.getDate()) + "</span>";
+        header += "</div>";
 
         return header;
     }
@@ -131,6 +134,6 @@ public class Entry extends AppCompatActivity {
     }
 
     private String formatDate(Date date) {
-        return date.toString();
+        return new SimpleDateFormat("dd/MM/yyyy, HH:mm").format(date);
     }
 }

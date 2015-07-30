@@ -144,10 +144,7 @@ public class FeedlyUtils {
             for (int i = 0; i < subscriptions.length(); i++) {
                 JSONObject o = subscriptions.getJSONObject(i);
 
-                Subscription s = new Subscription();
-                s.setId(o.getString("id"));
-                s.setUrl(o.getString("website"));
-                s.setTitle(o.getString("title"));
+                Subscription s = new Subscription(o);
 
                 data.subscriptions.add(s);
                 data.unreadEntries.put(s.getId(), new ArrayList<Entry>());
@@ -168,16 +165,7 @@ public class FeedlyUtils {
         try {
             for (int i = 0; i < entries.length(); i++) {
                 JSONObject o = entries.getJSONObject(i);
-
-                Entry e = new Entry();
-                e.setTitle(o.getString("title"));
-                e.setSummary(o.has("summary") ? o.getJSONObject("summary").getString("content") : "");
-                e.setDate(new Date(o.getLong("published")));
-                e.setRead(!o.getBoolean("unread"));
-                e.setAuthor(o.has("author") ? o.getString("author") : "");
-                e.setUrl(o.getString("originId"));
-                e.setContent(o.has("content") ? o.getJSONObject("content").getString("content") : "");
-                e.setId(o.getString("id"));
+                Entry e = new Entry(o);
 
                 if (e.isRead())
                     readEntries.add(e);

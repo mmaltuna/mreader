@@ -1,7 +1,19 @@
 img, iframe {
     max-width: 100%;
-    min-width: 100%;
     height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}
+
+img {
+    display: block;
+    float: none;
+}
+
+iframe {
+    border: 0;
 }
 
 body {
@@ -14,4 +26,28 @@ a {
     color: #3F51B5;
     text-decoration: none;
     font-weight: bold;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.header-title {
+    font-size: 22px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.header-title a {
+    color: black;
+    text-decoration: none;
+}
+
+.header-author, .header-date {
+    font-size: 14px;
+    color: gray;
+}
+
+.header-date {
+    float: right;
 }

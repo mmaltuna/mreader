@@ -1,5 +1,8 @@
 package com.mmaltuna.mreader.model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Comparator;
 
 /**
@@ -8,6 +11,7 @@ import java.util.Comparator;
 public class Subscription {
     private String id;
     private String url;
+    private String iconUrl;
     private String title;
     private int unreadEntries;
     private int readEntries;
@@ -31,6 +35,21 @@ public class Subscription {
         readEntries = 0;
     }
 
+    public Subscription(JSONObject o) {
+        unreadEntries = 0;
+        readEntries = 0;
+
+        try {
+            id = o.getString("id");
+            url = o.getString("website");
+            title = o.getString("title");
+
+            iconUrl = o.has("iconUrl") ? o.getString("iconUrl") : "";
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getId() {
         return id;
     }
@@ -46,6 +65,10 @@ public class Subscription {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    public String getIconUrl() { return iconUrl; }
+
+    public void setIconUrl(String iconUrl) { this.iconUrl = iconUrl; }
 
     public String getTitle() {
         return title;
