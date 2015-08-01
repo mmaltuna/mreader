@@ -1,5 +1,11 @@
 package com.mmaltuna.mreader.model;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+
+import com.mmaltuna.mreader.utils.FeedlyUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,6 +21,7 @@ public class Subscription {
     private String title;
     private int unreadEntries;
     private int readEntries;
+    private Bitmap favicon;
 
     public static Comparator<Subscription> comparatorMostUnread = new Comparator<Subscription>() {
         @Override
@@ -33,6 +40,7 @@ public class Subscription {
     public Subscription() {
         unreadEntries = 0;
         readEntries = 0;
+        favicon = null;
     }
 
     public Subscription(JSONObject o) {
@@ -96,5 +104,13 @@ public class Subscription {
 
     public int getTotalEntries() {
         return unreadEntries + readEntries;
+    }
+
+    public Bitmap getFavicon() {
+        return favicon;
+    }
+
+    public void setFavicon(Bitmap favicon) {
+        this.favicon = favicon;
     }
 }

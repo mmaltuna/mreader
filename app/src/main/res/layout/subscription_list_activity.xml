@@ -21,8 +21,9 @@
             android:layout_height="wrap_content"
             android:id="@+id/progressbar"
             android:max="10000"
+            android:visibility="invisible"
             android:elevation="4dp"
-            android:layout_marginTop="-8dp"
+            android:layout_marginTop="-10dp"
             android:layout_marginBottom="-8dp"
             android:progressTint="@color/Indigo500"
             android:backgroundTint="@color/Red500"/>
@@ -37,6 +38,9 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/drawer_menu_header"
-        app:menu="@menu/navigation_drawer_menu" />
+        app:menu="@menu/navigation_drawer_menu"
+        app:itemIconTint="@color/drawer_item"
+        app:itemTextColor="@color/drawer_item"
+        android:background="@android:color/background_light"/>
 
 </android.support.v4.widget.DrawerLayout>

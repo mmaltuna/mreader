@@ -9,7 +9,7 @@
         android:id="@+id/subscriptionList"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background_material_light">
+        android:background="@android:color/background_light">
 
     </ListView>
 

@@ -2,13 +2,13 @@ package com.mmaltuna.mreader;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.style.SubscriptSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,10 +51,7 @@ public class SubscriptionList extends AppCompatActivity {
     private Data data;
     private FeedlyUtils feedly;
 
-    private ProgressBar progressBar;
-    private int progressBarMax = 10000;
-    private int progressBarInc;
-    private int progressBarStep;
+    private com.mmaltuna.mreader.view.ProgressBar progressBar;
 
     private int currentView;
     private Toast currentToast;
@@ -123,7 +120,8 @@ public class SubscriptionList extends AppCompatActivity {
         subscriptionList = new ArrayList<Subscription>();
         listView.setOnItemClickListener(subscriptionListClickListener);
 
-        initProgressBar();
+        progressBar = new com.mmaltuna.mreader.view.ProgressBar(
+                (ProgressBar) findViewById(R.id.progressbar));
 
         selectedComparator = Subscription.comparatorMostUnread;
         currentView = VIEW_UNREAD;
@@ -164,16 +162,19 @@ public class SubscriptionList extends AppCompatActivity {
     }
 
     public void loadData(final boolean update, final boolean unreadOnly) {
-        initProgressBar();
-
         FeedlyUtils.Callback subscriptionsCallback = new FeedlyUtils.Callback() {
             @Override
             public void onComplete() {
-                if (update)
+                if (update) {
                     currentToast.setText("Updating entries...");
-                progressBarInc = progressBarMax / data.subscriptions.size();
+                    progressBar.init(data.subscriptions.size());
+                    progressBar.show();
+                }
 
                 for (final Subscription s: data.subscriptions) {
+                    s.setFavicon(BitmapFactory.decodeFile(getFilesDir().getPath() + "/" +
+                            FeedlyUtils.FOLDER_ICONS + "/" + s.getTitle()));
+
                     if (update)
                         feedly.updateEntries(unreadOnly, s.getId(), new FeedlyUtils.Callback() {
                             @Override
@@ -189,7 +190,9 @@ public class SubscriptionList extends AppCompatActivity {
                                 Collections.sort(subscriptionList, selectedComparator);
                                 subscriptionListAdapter.notifyDataSetChanged();
 
-                                loadSubscription();
+                                progressBar.step();
+                                if (progressBar.isFinished())
+                                    progressBar.hide();
                             }
                         });
                     else
@@ -206,8 +209,6 @@ public class SubscriptionList extends AppCompatActivity {
 
                                 Collections.sort(subscriptionList, selectedComparator);
                                 subscriptionListAdapter.notifyDataSetChanged();
-
-                                loadSubscription();
                             }
                         });
                 }
@@ -225,26 +226,5 @@ public class SubscriptionList extends AppCompatActivity {
 
     public void updateAll(MenuItem menuItem) {
         loadView(currentView, true);
-    }
-
-    private void initProgressBar() {
-        progressBarStep = 0;
-        if (progressBar == null)
-            progressBar = (ProgressBar) findViewById(R.id.progressbar);
-        progressBar.setProgress(0);
-    }
-
-    private void stepProgressBar() {
-        int progress = progressBar.getProgress();
-        progressBar.setProgress(progress + progressBarInc);
-        progressBarStep++;
-    }
-
-    private void loadSubscription() {
-        stepProgressBar();
-        if (progressBarStep == Data.getInstance().subscriptions.size()) {
-            subscriptionListAdapter.notifyDataSetChanged();
-            initProgressBar();
-        }
     }
 }
