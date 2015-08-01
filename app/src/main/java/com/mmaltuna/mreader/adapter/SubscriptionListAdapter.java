@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.mmaltuna.mreader.R;
 import com.mmaltuna.mreader.model.Subscription;
+import com.mmaltuna.mreader.utils.CacheUtils;
 
 import java.util.ArrayList;
 
@@ -59,7 +60,7 @@ public class SubscriptionListAdapter extends BaseAdapter {
 
         Subscription subscription = subscriptions.get(position);
         name.setText(subscription.getTitle());
-        favicon.setImageBitmap(subscription.getFavicon());
+        favicon.setImageBitmap(CacheUtils.getInstance(activity).getPicture(subscription.getIconUrl()));
 
         String counter = "";
         if (unreadOnly)

@@ -2,7 +2,6 @@ package com.mmaltuna.mreader;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -45,9 +44,9 @@ public class SubscriptionList extends AppCompatActivity {
     private SubscriptionListAdapter subscriptionListAdapter;
     private ArrayList<Subscription> subscriptionList;
     private Comparator<Subscription> selectedComparator;
-    private Activity activity;
     private ListView listView;
     private NavigationView navigationView;
+
     private Data data;
     private FeedlyUtils feedly;
 
@@ -98,7 +97,6 @@ public class SubscriptionList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.subscription_list_activity);
 
-        activity = this;
         listView = (ListView) findViewById(R.id.subscriptionList);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -172,9 +170,6 @@ public class SubscriptionList extends AppCompatActivity {
                 }
 
                 for (final Subscription s: data.subscriptions) {
-                    s.setFavicon(BitmapFactory.decodeFile(getFilesDir().getPath() + "/" +
-                            FeedlyUtils.FOLDER_ICONS + "/" + s.getTitle()));
-
                     if (update)
                         feedly.updateEntries(unreadOnly, s.getId(), new FeedlyUtils.Callback() {
                             @Override

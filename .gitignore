@@ -6,3 +6,5 @@
 /captures
 /libs/*
 libs/*
+libs/libs.iml
+*.iml

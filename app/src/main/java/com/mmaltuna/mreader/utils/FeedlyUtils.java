@@ -26,6 +26,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,6 +80,7 @@ public class FeedlyUtils {
                     JSONArray jsonResponse = new JSONArray(response);
                     loadSubscriptions(jsonResponse);
                     cacheSubscriptions(jsonResponse);
+                    cacheFavicons(Data.getInstance().subscriptions);
                 } catch (JSONException jsonException) {
                     jsonException.printStackTrace();
                 } finally {
@@ -190,11 +192,6 @@ public class FeedlyUtils {
     private void cacheSubscriptions(JSONArray subscriptions) {
         try {
             jsonArrayToFile(subscriptions, FILE_SUBSCRIPTIONS);
-            File iconsFolder = new File(context.getFilesDir().getPath() + "/" + FOLDER_ICONS);
-            if (!iconsFolder.exists()) {
-                iconsFolder.mkdir();
-                cacheFavicons(subscriptions, iconsFolder.getPath());
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -208,21 +205,9 @@ public class FeedlyUtils {
         }
     }
 
-    private void cacheFavicons(JSONArray subscriptions, String iconsFolder) {
-        try {
-            for (int i = 0; i < subscriptions.length(); i++) {
-                JSONObject subscription = subscriptions.getJSONObject(i);
-                String faviconUrl = "";
-                if (subscription.has("iconUrl")) {
-                    faviconUrl = subscription.getString("iconUrl");
-                } else {
-                    faviconUrl = subscription.getString("website") + "/favicon.ico";
-                }
-                new CacheImageTask().execute(faviconUrl,
-                        iconsFolder + "/" + subscription.getString("title"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void cacheFavicons(List<Subscription> subscriptions) {
+        for (Subscription s: subscriptions) {
+            CacheUtils.getInstance(context).cachePicture(s.getIconUrl());
         }
     }
 
@@ -279,41 +264,5 @@ public class FeedlyUtils {
 
     public static interface Callback {
         public void onComplete();
-    }
-
-    private class CacheImageTask extends AsyncTask<String, Void, Void> {
-
-        public CacheImageTask() {}
-
-        protected Void doInBackground(String... params) {
-            String url = params[0];
-            String path = params[1];
-
-            try {
-                InputStream is = new URL(url).openStream();
-                OutputStream os = new FileOutputStream(new File(path));
-                writeFile(is, os);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        private void writeFile(InputStream is, OutputStream os) throws IOException {
-            int bufferSize = 2048;
-            try {
-                byte[] buffer = new byte[bufferSize];
-                int bytesRead = 0;
-                while ((bytesRead = is.read(buffer, 0, buffer.length)) >= 0) {
-                    os.write(buffer, 0, bytesRead);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                is.close();
-                os.close();
-            }
-        }
     }
 }

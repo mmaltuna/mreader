@@ -21,7 +21,6 @@ public class Subscription {
     private String title;
     private int unreadEntries;
     private int readEntries;
-    private Bitmap favicon;
 
     public static Comparator<Subscription> comparatorMostUnread = new Comparator<Subscription>() {
         @Override
@@ -40,7 +39,6 @@ public class Subscription {
     public Subscription() {
         unreadEntries = 0;
         readEntries = 0;
-        favicon = null;
     }
 
     public Subscription(JSONObject o) {
@@ -52,7 +50,11 @@ public class Subscription {
             url = o.getString("website");
             title = o.getString("title");
 
-            iconUrl = o.has("iconUrl") ? o.getString("iconUrl") : "";
+            if (o.has("iconUrl")) {
+                iconUrl = o.getString("iconUrl");
+            } else {
+                iconUrl = o.getString("website") + "/favicon.ico";
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -104,13 +106,5 @@ public class Subscription {
 
     public int getTotalEntries() {
         return unreadEntries + readEntries;
-    }
-
-    public Bitmap getFavicon() {
-        return favicon;
-    }
-
-    public void setFavicon(Bitmap favicon) {
-        this.favicon = favicon;
     }
 }
