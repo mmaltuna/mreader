@@ -11,17 +11,10 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_refresh"
-        android:icon="@drawable/ic_refresh_white_24dp"
-        android:title="Update"
-        android:orderInCategory="200"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/action_markallasread"
         android:icon="@drawable/ic_done_all_white_24dp"
         android:title="Mark all as read"
-        android:orderInCategory="300"
+        android:orderInCategory="200"
         app:showAsAction="ifRoom" />
 
 </menu>

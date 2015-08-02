@@ -86,6 +86,9 @@ public class SubscriptionList extends AppCompatActivity {
                 }
 
                 loadView(currentView, false);
+            } else {
+                Intent intent = new Intent(getApplicationContext(), Settings.class);
+                startActivity(intent);
             }
 
             drawerLayout.closeDrawers();
@@ -138,6 +141,7 @@ public class SubscriptionList extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this, Settings.class));
             return true;
         }
 

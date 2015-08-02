@@ -22,7 +22,6 @@
         android:layout_toRightOf="@+id/thumbnail"
         android:textSize="17dp"
         android:textStyle="bold"
-        android:textColor="@android:color/primary_text_light"
         android:text="Entry title"/>
 
     <TextView
@@ -33,6 +32,7 @@
         android:layout_marginTop="1dip"
         android:layout_toRightOf="@+id/thumbnail"
         android:textSize="14dp"
+        android:textColor="@color/secondary_text_default_material_light"
         android:text="Entry content. Since this is the content, it should be longer than the title."/>
 
 </RelativeLayout>
