@@ -12,7 +12,9 @@ import android.widget.TextView;
 import com.mmaltuna.mreader.R;
 import com.mmaltuna.mreader.model.Subscription;
 import com.mmaltuna.mreader.utils.CacheUtils;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -61,6 +63,11 @@ public class SubscriptionListAdapter extends BaseAdapter {
         Subscription subscription = subscriptions.get(position);
         name.setText(subscription.getTitle());
         favicon.setImageBitmap(CacheUtils.getInstance(activity).getPicture(subscription.getIconUrl()));
+
+        if (!"".equals(subscription.getIconUrl()))
+            Picasso.with(activity)
+                    .load(new File(CacheUtils.getInstance(activity).getFilePath(subscription.getIconUrl())))
+                    .into(favicon);
 
         String counter = "";
         if (unreadOnly)

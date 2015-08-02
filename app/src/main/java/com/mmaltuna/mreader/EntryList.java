@@ -12,6 +12,7 @@ import android.widget.ListView;
 
 import com.mmaltuna.mreader.adapter.EntryListAdapter;
 import com.mmaltuna.mreader.model.Data;
+import com.mmaltuna.mreader.utils.CacheUtils;
 
 import java.util.ArrayList;
 

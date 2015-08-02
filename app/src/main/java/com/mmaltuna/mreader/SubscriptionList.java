@@ -1,6 +1,5 @@
 package com.mmaltuna.mreader;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -17,8 +16,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.mmaltuna.mreader.adapter.SubscriptionListAdapter;
-import com.mmaltuna.mreader.model.Data;
-import com.mmaltuna.mreader.model.Subscription;
+import com.mmaltuna.mreader.model.*;
+import com.mmaltuna.mreader.utils.CacheUtils;
 import com.mmaltuna.mreader.utils.FeedlyUtils;
 
 import java.util.ArrayList;
@@ -49,6 +48,7 @@ public class SubscriptionList extends AppCompatActivity {
 
     private Data data;
     private FeedlyUtils feedly;
+    private CacheUtils cache;
 
     private com.mmaltuna.mreader.view.ProgressBar progressBar;
 
@@ -58,9 +58,10 @@ public class SubscriptionList extends AppCompatActivity {
     private AdapterView.OnItemClickListener subscriptionListClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Subscription subscription = (Subscription) subscriptionListAdapter.getItem(position);
             Intent intent = new Intent(getApplicationContext(), EntryList.class);
-            intent.putExtra(SELECTED_FEED_ID, ((Subscription) subscriptionListAdapter.getItem(position)).getId());
-            intent.putExtra(SELECTED_FEED_TITLE, ((Subscription) subscriptionListAdapter.getItem(position)).getTitle());
+            intent.putExtra(SELECTED_FEED_ID, subscription.getId());
+            intent.putExtra(SELECTED_FEED_TITLE, subscription.getTitle());
             intent.putExtra(SELECTED_VIEW, currentView);
             startActivity(intent);
         }
@@ -114,6 +115,7 @@ public class SubscriptionList extends AppCompatActivity {
 
         data = Data.getInstance();
         feedly = FeedlyUtils.getInstance(this);
+        cache = CacheUtils.getInstance(this);
 
         subscriptionList = new ArrayList<Subscription>();
         listView.setOnItemClickListener(subscriptionListClickListener);

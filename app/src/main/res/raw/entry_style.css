@@ -51,3 +51,9 @@ a {
 .header-date {
     float: right;
 }
+
+blockquote {
+    border-left: 3px solid #3F51B5;
+    margin-left: 0;
+    padding-left: 10px;
+}

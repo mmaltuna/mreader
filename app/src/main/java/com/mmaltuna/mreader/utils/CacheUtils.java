@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.util.LruCache;
+import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,10 +14,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created by miguel on 1/8/15.
@@ -25,13 +27,29 @@ public class CacheUtils {
     public static final String FOLDER_PICS = "/pictures";
 
     private String folderPicsPath;
-    private Context context;x
-    private Map<String, Bitmap> pics;
+    private Context context;
+
+    private LruCache<String, Bitmap> pics;
+    private int maxMemory;
+    private int cacheSize;
 
     private static CacheUtils instance;
     private CacheUtils(Context context) {
         this.context = context;
-        pics = new HashMap<String, Bitmap>();
+
+        maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        cacheSize = maxMemory / 8;
+
+        System.out.println("Total memory: " + maxMemory);
+        System.out.println("Cache size: " + cacheSize);
+
+        pics = new LruCache<String, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                return bitmap.getByteCount() / 1024;
+            }
+        };
+
         folderPicsPath = context.getFilesDir().getPath() + FOLDER_PICS;
     }
 
@@ -41,30 +59,32 @@ public class CacheUtils {
         return instance;
     }
 
-    public void cachePicture(String url) {
+    public String getFilePath(String url) {
+        return folderPicsPath + "/" + encodeString(url);
+    }
+
+    public void downloadPicture(String url) {
         File picsFolder = new File(folderPicsPath);
         if (!picsFolder.exists())
             picsFolder.mkdir();
 
-        new CachePictureTask(pics).execute(url, picsFolder.getAbsolutePath() + "/" + encodeString(url));
+        new SavePictureTask().execute(url, picsFolder.getAbsolutePath() + "/" + encodeString(url));
     }
 
     @Nullable
     public Bitmap getPicture(String url) {
         String key = encodeString(url);
-        if (!pics.containsKey(key)) {
-            pics.put(key, BitmapFactory.decodeFile(folderPicsPath + "/" + key));
+        if (pics.get(key) == null) {
+            Bitmap bitmap = BitmapFactory.decodeFile(folderPicsPath + "/" + key);
+            if (bitmap != null)
+                pics.put(key, bitmap);
         }
 
         return pics.get(key);
     }
 
-    private static class CachePictureTask extends AsyncTask<String, Void, Void> {
-        private Map<String, Bitmap> pics;
-
-        public CachePictureTask(Map<String, Bitmap> pics) {
-            this.pics = pics;
-        }
+    private static class SavePictureTask extends AsyncTask<String, Void, Void> {
+        public SavePictureTask() {}
 
         protected Void doInBackground(String... params) {
             String url = params[0];
@@ -74,11 +94,6 @@ public class CacheUtils {
                 InputStream is = new URL(url).openStream();
                 OutputStream os = new FileOutputStream(new File(path));
                 writeFile(is, os);
-
-                Bitmap bitmap = BitmapFactory.decodeFile(path);
-                if (bitmap != null)
-                    pics.put(encodeString(url), bitmap);
-
             } catch (Exception e) {
                 e.printStackTrace();
             }

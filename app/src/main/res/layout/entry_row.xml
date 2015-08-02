@@ -7,9 +7,12 @@
 
     <ImageView
         android:id="@+id/thumbnail"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentLeft="true" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:scaleType="centerCrop"/>
 
     <TextView
         android:id="@+id/title"
@@ -19,7 +22,8 @@
         android:layout_toRightOf="@+id/thumbnail"
         android:textSize="17dp"
         android:textStyle="bold"
-        android:textColor="@android:color/primary_text_light"/>
+        android:textColor="@android:color/primary_text_light"
+        android:text="Entry title"/>
 
     <TextView
         android:id="@+id/summary"
@@ -28,6 +32,7 @@
         android:layout_below="@+id/title"
         android:layout_marginTop="1dip"
         android:layout_toRightOf="@+id/thumbnail"
-        android:textSize="14dp" />
+        android:textSize="14dp"
+        android:text="Entry content. Since this is the content, it should be longer than the title."/>
 
 </RelativeLayout>

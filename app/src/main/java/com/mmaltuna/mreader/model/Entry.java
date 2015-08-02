@@ -4,10 +4,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by miguel on 23/7/15.
@@ -40,9 +43,13 @@ public class Entry {
             if (o.has("author"))
                 author = o.getString("author");
             url = o.getString("originId");
-            thumbnailUrl = o.has("thumbnail") ? o.getJSONArray("thumbnail").getJSONObject(0).getString("url") : "";
-            setContent(o.has("content") ? o.getJSONObject("content").getString("content") : "");
             id = o.getString("id");
+            setContent(o.has("content") ? o.getJSONObject("content").getString("content") : "");
+            thumbnailUrl = o.has("thumbnail") ? o.getJSONArray("thumbnail").getJSONObject(0).getString("url") : "";
+            if ("".compareTo(thumbnailUrl) == 0) {
+                List<String> pictures = getPictures(this);
+                thumbnailUrl = pictures.size() > 0 ? pictures.get(0) : "";
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -167,5 +174,14 @@ public class Entry {
         }
 
         return summary;
+    }
+
+    public static List<String> getPictures(Entry e) {
+        List<String> pics = new ArrayList<String>();
+        Elements elems = Jsoup.parse(e.content).select("img");
+        for (Element elem: elems)
+            pics.add(elem.attr("src"));
+
+        return pics;
     }
 }

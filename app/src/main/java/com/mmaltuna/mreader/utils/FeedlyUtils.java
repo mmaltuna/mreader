@@ -1,7 +1,6 @@
 package com.mmaltuna.mreader.utils;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import com.mmaltuna.mreader.model.Data;
@@ -13,16 +12,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,11 +38,6 @@ public class FeedlyUtils {
 
     public final static String FILE_SUBSCRIPTIONS = "subcriptions";
     public final static String FILE_ENTRIES = "entries";
-
-    public final static String FOLDER_SUBSCRIPTIONS = "subcriptions";
-    public final static String FOLDER_ENTRIES = "entries";
-    public final static String FOLDER_ICONS = "icons";
-    public final static String FOLDER_PICS = "pics";
 
     private Context context;
 
@@ -119,6 +109,7 @@ public class FeedlyUtils {
                     JSONArray entries = new JSONObject(response).getJSONArray("items");
                     loadEntries(entries, feedId);
                     cacheEntries(entries, id);
+                    savePictures(feedId);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } finally {
@@ -207,7 +198,19 @@ public class FeedlyUtils {
 
     private void cacheFavicons(List<Subscription> subscriptions) {
         for (Subscription s: subscriptions) {
-            CacheUtils.getInstance(context).cachePicture(s.getIconUrl());
+            CacheUtils.getInstance(context).downloadPicture(s.getIconUrl());
+        }
+    }
+
+    private void savePictures(String feedId) {
+        for (Entry e: Data.getInstance().unreadEntries.get(feedId)) {
+            if ("".compareTo(e.getThumbnailUrl()) != 0)
+                CacheUtils.getInstance(context).downloadPicture(e.getThumbnailUrl());
+        }
+
+        for (Entry e: Data.getInstance().readEntries.get(feedId)) {
+            if ("".compareTo(e.getThumbnailUrl()) != 0)
+                CacheUtils.getInstance(context).downloadPicture(e.getThumbnailUrl());
         }
     }
 

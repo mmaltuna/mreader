@@ -2,17 +2,21 @@ package com.mmaltuna.mreader.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mmaltuna.mreader.R;
 import com.mmaltuna.mreader.model.Entry;
+import com.mmaltuna.mreader.utils.CacheUtils;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -59,11 +63,23 @@ public class EntryListAdapter extends BaseAdapter {
         Entry entry = entries.get(position);
         title.setText(entry.getTitle());
         summary.setText(entry.getSummaryFragment());
-        if ("".compareTo(entry.getThumbnailUrl()) != 0) {
-            System.out.println(entry.getThumbnailUrl());
-            Picasso.with(activity).load(entry.getThumbnailUrl()).into(thumbnail);
-        }
+
+        int w = entry.getSummaryFragment().equals("") ? dpToPx(120) : dpToPx(80);
+        int h = entry.getSummaryFragment().equals("") ? dpToPx(80) : dpToPx(120);
+
+        if ("".compareTo(entry.getThumbnailUrl()) != 0)
+            Picasso.with(activity)
+                    .load(new File(CacheUtils.getInstance(activity).getFilePath(entry.getThumbnailUrl())))
+                    .resize(w, h)
+                    .centerCrop()
+                    .into(thumbnail);
 
         return convertView;
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
     }
 }
