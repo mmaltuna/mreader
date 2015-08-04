@@ -26,4 +26,32 @@ public class Data {
             instance = new Data();
         return instance;
     }
+
+    public int getNumberOfPics(Boolean read) {
+        int pics = 0;
+        for (Subscription s: subscriptions) {
+            pics += getNumberOfPics(s.getId(), read);
+        }
+
+        return pics;
+    }
+
+    public int getNumberOfPics(String feedId, Boolean read) {
+        int picsUnread = 0;
+        int picsRead = 0;
+
+        if (read == null || read) {
+            for (Entry e: readEntries.get(feedId)) {
+                picsRead += e.getPictures().size();
+            }
+        }
+
+        if (read == null || !read) {
+            for (Entry e: unreadEntries.get(feedId)) {
+                picsUnread += e.getPictures().size();
+            }
+        }
+
+        return picsRead + picsUnread;
+    }
 }

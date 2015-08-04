@@ -29,9 +29,12 @@ public class Entry {
     private Date date;
     private boolean read;
 
+    private List<String> pictures;
+
     public Entry() {
         summary = "";
         content = "";
+        pictures = new ArrayList<String>();
     }
 
     public Entry(JSONObject o) {
@@ -46,8 +49,9 @@ public class Entry {
             id = o.getString("id");
             setContent(o.has("content") ? o.getJSONObject("content").getString("content") : "");
             thumbnailUrl = o.has("thumbnail") ? o.getJSONArray("thumbnail").getJSONObject(0).getString("url") : "";
+
+            pictures = getPictures(this);
             if ("".compareTo(thumbnailUrl) == 0) {
-                List<String> pictures = getPictures(this);
                 thumbnailUrl = pictures.size() > 0 ? pictures.get(0) : "";
             }
         } catch (JSONException e) {
@@ -176,7 +180,11 @@ public class Entry {
         return summary;
     }
 
-    public static List<String> getPictures(Entry e) {
+    public List<String> getPictures() {
+        return pictures;
+    }
+
+    private static List<String> getPictures(Entry e) {
         List<String> pics = new ArrayList<String>();
         Elements elems = Jsoup.parse(e.content).select("img");
         for (Element elem: elems)

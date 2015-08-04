@@ -1,8 +1,11 @@
 package com.mmaltuna.mreader.utils;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 
+import com.mmaltuna.mreader.R;
 import com.mmaltuna.mreader.model.Data;
 import com.mmaltuna.mreader.model.Entry;
 import com.mmaltuna.mreader.model.Subscription;
@@ -109,7 +112,6 @@ public class FeedlyUtils {
                     JSONArray entries = new JSONObject(response).getJSONArray("items");
                     loadEntries(entries, feedId);
                     cacheEntries(entries, id);
-                    savePictures(feedId);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } finally {
@@ -198,19 +200,7 @@ public class FeedlyUtils {
 
     private void cacheFavicons(List<Subscription> subscriptions) {
         for (Subscription s: subscriptions) {
-            CacheUtils.getInstance(context).downloadPicture(s.getIconUrl());
-        }
-    }
-
-    private void savePictures(String feedId) {
-        for (Entry e: Data.getInstance().unreadEntries.get(feedId)) {
-            if ("".compareTo(e.getThumbnailUrl()) != 0)
-                CacheUtils.getInstance(context).downloadPicture(e.getThumbnailUrl());
-        }
-
-        for (Entry e: Data.getInstance().readEntries.get(feedId)) {
-            if ("".compareTo(e.getThumbnailUrl()) != 0)
-                CacheUtils.getInstance(context).downloadPicture(e.getThumbnailUrl());
+            //CacheUtils.getInstance(context).downloadPicture(s.getIconUrl());
         }
     }
 

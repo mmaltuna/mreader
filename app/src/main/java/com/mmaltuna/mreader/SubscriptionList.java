@@ -192,8 +192,10 @@ public class SubscriptionList extends AppCompatActivity {
                                 subscriptionListAdapter.notifyDataSetChanged();
 
                                 progressBar.step();
-                                if (progressBar.isFinished())
+                                if (progressBar.isFinished()) {
                                     progressBar.hide();
+                                    cache.savePictures();
+                                }
                             }
                         });
                     else

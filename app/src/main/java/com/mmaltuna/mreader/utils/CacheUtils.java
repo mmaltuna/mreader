@@ -1,12 +1,19 @@
 package com.mmaltuna.mreader.utils;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.LruCache;
 import android.widget.ImageView;
+
+import com.mmaltuna.mreader.R;
+import com.mmaltuna.mreader.model.Data;
+import com.mmaltuna.mreader.model.Entry;
+import com.mmaltuna.mreader.model.Subscription;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,6 +35,11 @@ public class CacheUtils {
 
     private String folderPicsPath;
     private Context context;
+    private NotificationManager notificationManager;
+    private NotificationCompat.Builder notificationBuilder;
+    private int notificationProgress;
+    private int notificationProgressMax;
+    private int notificationProgressId;
 
     private LruCache<String, Bitmap> pics;
     private int maxMemory;
@@ -68,7 +80,7 @@ public class CacheUtils {
         if (!picsFolder.exists())
             picsFolder.mkdir();
 
-        new SavePictureTask().execute(url, picsFolder.getAbsolutePath() + "/" + encodeString(url));
+        new SavePictureTask(this).execute(url, picsFolder.getAbsolutePath() + "/" + encodeString(url));
     }
 
     @Nullable
@@ -83,8 +95,57 @@ public class CacheUtils {
         return pics.get(key);
     }
 
+    public void savePictures() {
+        Data data = Data.getInstance();
+        notificationProgressMax = data.getNumberOfPics(null);
+
+        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationBuilder = new NotificationCompat.Builder(context);
+        notificationBuilder.setContentTitle("Downloading pictures...")
+                .setContentText("Download in progress")
+                .setSmallIcon(R.drawable.ic_refresh_white_24dp);
+        notificationProgress = 0;
+        notificationProgressId = 1;
+        notificationBuilder.setProgress(notificationProgressMax, notificationProgress, false);
+        notificationManager.notify(notificationProgressId, notificationBuilder.build());
+
+        for (Subscription s: data.subscriptions) {
+            savePictures(s.getId());
+        }
+    }
+
+    private void savePictures(String feedId) {
+        for (Entry e: Data.getInstance().unreadEntries.get(feedId)) {
+            for (String s: e.getPictures())
+                CacheUtils.getInstance(context).downloadPicture(s);
+        }
+
+        for (Entry e: Data.getInstance().readEntries.get(feedId)) {
+            for (String s: e.getPictures())
+                CacheUtils.getInstance(context).downloadPicture(s);
+        }
+    }
+
+    public void addProgress(int progress) {
+        notificationProgress += progress;
+        notificationBuilder.setProgress(notificationProgressMax, notificationProgress, false);
+        notificationBuilder.setContentText("Downloaded " + notificationProgress + "/" + notificationProgressMax + " pictures");
+        notificationManager.notify(notificationProgressId, notificationBuilder.build());
+
+        if (notificationProgress == notificationProgressMax) {
+            notificationBuilder.setProgress(0, 0, false);
+            notificationBuilder.setContentTitle("Download finished")
+                    .setContentText("Downloaded " + notificationProgressMax + " pictures");
+            notificationManager.notify(notificationProgressId, notificationBuilder.build());
+        }
+    }
+
     private static class SavePictureTask extends AsyncTask<String, Void, Void> {
-        public SavePictureTask() {}
+        private CacheUtils cache;
+
+        public SavePictureTask(CacheUtils cache) {
+            this.cache = cache;
+        }
 
         protected Void doInBackground(String... params) {
             String url = params[0];
@@ -99,6 +160,11 @@ public class CacheUtils {
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            cache.addProgress(1);
         }
 
         private void writeFile(InputStream is, OutputStream os) throws IOException {
