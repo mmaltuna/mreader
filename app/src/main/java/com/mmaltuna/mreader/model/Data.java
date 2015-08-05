@@ -2,7 +2,9 @@ package com.mmaltuna.mreader.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by miguel on 25/7/15.
@@ -14,11 +16,13 @@ public class Data {
     public ArrayList<Subscription> subscriptions;
     public Map<String, ArrayList<Entry>> unreadEntries;
     public Map<String, ArrayList<Entry>> readEntries;
+    public Set<String> savedPictures;
 
     private Data() {
         subscriptions = new ArrayList<Subscription>();
         unreadEntries = new HashMap<String, ArrayList<Entry>>();
         readEntries = new HashMap<String, ArrayList<Entry>>();
+        savedPictures = new HashSet<String>();
     }
 
     public static Data getInstance() {

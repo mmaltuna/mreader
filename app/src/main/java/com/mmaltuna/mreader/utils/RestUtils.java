@@ -7,8 +7,11 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -34,8 +37,30 @@ public class RestUtils {
         request(Request.Method.GET, url, headers, params, callback);
     }
 
-    public void post(String url, final Map<String, String> headers, final Map<String, String> params, final RequestCallback callback) {
-        request(Request.Method.POST, url, headers, params, callback);
+    public void post(String url, final Map<String, String> headers, final JSONObject params, final RequestCallback callback) {
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.POST, url, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (callback != null)
+                            callback.invoke(response.toString());
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.err.println(error);
+                    }
+                }) {
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return headers;
+            }
+        };
+
+        requestQueue.add(jsonObjectRequest);
     }
 
     private void request(int method, String url, final Map<String, String> headers,

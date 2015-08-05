@@ -62,6 +62,7 @@ public class EntryListAdapter extends BaseAdapter {
 
         Entry entry = entries.get(position);
         title.setText(entry.getTitle());
+
         summary.setText(entry.getSummaryFragment());
 
         int w = entry.getSummaryFragment().equals("") ? dpToPx(120) : dpToPx(80);

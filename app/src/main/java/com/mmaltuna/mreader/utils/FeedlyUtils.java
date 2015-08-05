@@ -38,14 +38,17 @@ public class FeedlyUtils {
     public final static String METHOD_SUBSCRIPTIONS = "/subscriptions";
     public final static String METHOD_STREAMS = "/streams";
     public final static String METHOD_CONTENTS = "/contents";
+    public final static String METHOD_MARKERS = "/markers";
 
     public final static String FILE_SUBSCRIPTIONS = "subcriptions";
     public final static String FILE_ENTRIES = "entries";
 
     private Context context;
+    private RestUtils rest;
 
     private FeedlyUtils(Context context) {
         this.context = context;
+        rest = RestUtils.getInstance(context);
     }
 
     public static FeedlyUtils getInstance(Context context) {
@@ -66,7 +69,7 @@ public class FeedlyUtils {
     }
 
     public void updateSubscriptions(@Nullable final Callback callback) {
-        RestUtils.getInstance(context).get(BASE_URL + METHOD_SUBSCRIPTIONS, getHeaders(), null, new RestUtils.RequestCallback() {
+        rest.get(BASE_URL + METHOD_SUBSCRIPTIONS, getHeaders(), null, new RestUtils.RequestCallback() {
             @Override
             public void invoke(String response) {
                 try {
@@ -105,7 +108,7 @@ public class FeedlyUtils {
         if (unreadOnly)
             params.put("unreadOnly", "true");
 
-        RestUtils.getInstance(context).get(method, getHeaders(), params, new RestUtils.RequestCallback() {
+        rest.get(method, getHeaders(), params, new RestUtils.RequestCallback() {
             @Override
             public void invoke(String response) {
                 try {
@@ -120,6 +123,67 @@ public class FeedlyUtils {
                 }
             }
         });
+    }
+
+    public void toggleUnread(Entry entry) {
+        if (entry.isRead())
+            keepUnread(entry);
+        else
+            markAsRead(entry);
+    }
+
+    public void markAsRead(Entry entry) {
+        List<Entry> entryList = new ArrayList<Entry>();
+        entryList.add(entry);
+        markAsRead(entryList);
+    }
+
+    public void keepUnread(Entry entry) {
+        List<Entry> entryList = new ArrayList<Entry>();
+        entryList.add(entry);
+        keepUnread(entryList);
+    }
+
+    public void markAsRead(List<Entry> entries) {
+        String method = BASE_URL + METHOD_MARKERS;
+
+        JSONArray ids = new JSONArray();
+        for (Entry e: entries) {
+            e.setRead(true);
+            ids.put(e.getId());
+        }
+
+        try {
+            JSONObject params = new JSONObject();
+            params.put("action", "markAsRead");
+            params.put("type", "entries");
+            params.put("entryIds", ids);
+
+            rest.post(method, getHeaders(), params, null);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void keepUnread(List<Entry> entries) {
+        String method = BASE_URL + METHOD_MARKERS;
+
+        JSONArray ids = new JSONArray();
+        for (Entry e: entries) {
+            e.setRead(false);
+            ids.put(e.getId());
+        }
+
+        try {
+            JSONObject params = new JSONObject();
+            params.put("action", "keepUnread");
+            params.put("type", "entries");
+            params.put("entryIds", ids);
+
+            rest.post(method, getHeaders(), params, null);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean getSubscriptionsFromFile() {
@@ -239,7 +303,7 @@ public class FeedlyUtils {
 
     private Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Authorization", "OAuth As8ai9d7ImEiOiJGZWVkbHkgc2FuZGJveCBjbGllbnQiLCJlIjoxNDM4Nzk4Njg4MDg0LCJpIjoiMDZhZTI2YjktMDExYS00OWMzLWFiY2YtN2M1ZDgzNWEyMDZkIiwicCI6NiwidCI6MSwidiI6InNhbmRib3giLCJ3IjoiMjAxNS4zMCIsIngiOiJzdGFuZGFyZCJ9:sandbox");
+        headers.put("Authorization", "OAuth AmJg_R17ImEiOiJGZWVkbHkgc2FuZGJveCBjbGllbnQiLCJlIjoxNDM5NDA1NTczMjE3LCJpIjoiMDZhZTI2YjktMDExYS00OWMzLWFiY2YtN2M1ZDgzNWEyMDZkIiwicCI6NiwidCI6MSwidiI6InNhbmRib3giLCJ3IjoiMjAxNS4zMCIsIngiOiJzdGFuZGFyZCJ9:sandbox");
         return headers;
     }
 

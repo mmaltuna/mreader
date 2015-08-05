@@ -62,7 +62,6 @@ public class SubscriptionListAdapter extends BaseAdapter {
 
         Subscription subscription = subscriptions.get(position);
         name.setText(subscription.getTitle());
-        favicon.setImageBitmap(CacheUtils.getInstance(activity).getPicture(subscription.getIconUrl()));
 
         if (!"".equals(subscription.getIconUrl()))
             Picasso.with(activity)

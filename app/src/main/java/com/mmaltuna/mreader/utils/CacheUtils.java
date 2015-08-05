@@ -41,27 +41,9 @@ public class CacheUtils {
     private int notificationProgressMax;
     private int notificationProgressId;
 
-    private LruCache<String, Bitmap> pics;
-    private int maxMemory;
-    private int cacheSize;
-
     private static CacheUtils instance;
     private CacheUtils(Context context) {
         this.context = context;
-
-        maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        cacheSize = maxMemory / 8;
-
-        System.out.println("Total memory: " + maxMemory);
-        System.out.println("Cache size: " + cacheSize);
-
-        pics = new LruCache<String, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap bitmap) {
-                return bitmap.getByteCount() / 1024;
-            }
-        };
-
         folderPicsPath = context.getFilesDir().getPath() + FOLDER_PICS;
     }
 
@@ -81,18 +63,6 @@ public class CacheUtils {
             picsFolder.mkdir();
 
         new SavePictureTask(this).execute(url, picsFolder.getAbsolutePath() + "/" + encodeString(url));
-    }
-
-    @Nullable
-    public Bitmap getPicture(String url) {
-        String key = encodeString(url);
-        if (pics.get(key) == null) {
-            Bitmap bitmap = BitmapFactory.decodeFile(folderPicsPath + "/" + key);
-            if (bitmap != null)
-                pics.put(key, bitmap);
-        }
-
-        return pics.get(key);
     }
 
     public void savePictures() {

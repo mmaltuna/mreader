@@ -11,8 +11,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.mmaltuna.mreader.model.Data;
+import com.mmaltuna.mreader.utils.FeedlyUtils;
 
 import java.util.ArrayList;
 
@@ -25,8 +28,9 @@ public class Entry extends AppCompatActivity {
     private static int selectedView;
 
     private ArrayList<com.mmaltuna.mreader.model.Entry> entries;
-    private com.mmaltuna.mreader.model.Entry entry;
+    private com.mmaltuna.mreader.model.Entry currentEntry;
     private Data data;
+    private FeedlyUtils feedly;
 
     private ViewPager viewPager;
     private PagerAdapter pagerAdapter;
@@ -50,6 +54,7 @@ public class Entry extends AppCompatActivity {
         getSupportActionBar().setTitle(selectedFeedTitle);
 
         data = Data.getInstance();
+        feedly = FeedlyUtils.getInstance(this);
 
         switch (selectedView) {
             case SubscriptionList.VIEW_UNREAD:
@@ -62,11 +67,12 @@ public class Entry extends AppCompatActivity {
                 break;
         }
 
+        currentEntry = entries.get(selectedEntryId);
+
         viewPager = (ViewPager) findViewById(R.id.entryPager);
         pagerAdapter = new EntrySlidePagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         viewPager.setCurrentItem(selectedEntryId);
-
     }
 
     @Override
@@ -79,9 +85,17 @@ public class Entry extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.toggleUnread) {
+            currentEntry = entries.get(viewPager.getCurrentItem());
+            if (currentEntry.isRead()) {
+                item.setIcon(R.drawable.ic_unread_white_24dp);
+            } else {
+                item.setIcon(R.drawable.ic_read_white_24dp);
+            }
+
+            feedly.toggleUnread(currentEntry);
         }
 
         return super.onOptionsItemSelected(item);
@@ -98,6 +112,8 @@ public class Entry extends AppCompatActivity {
             arguments.putString("feedId", selectedFeedId);
             arguments.putInt("selectedView", selectedView);
             arguments.putInt("position", position);
+
+            feedly.markAsRead(entries.get(position));
 
             EntryFragment entry = new EntryFragment();
             entry.setArguments(arguments);
